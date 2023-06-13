@@ -1,7 +1,22 @@
 server:
-  port: 8081
+  port: 8200
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: PRODUCT-SERVICE
+  datasource:
+    url: jdbc:h2:mem:product
+    username: root
+    password: 123
+    driverClassName: org.h2.Driver
+  jpa:
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console.enabled: true
+
