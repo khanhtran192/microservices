@@ -1,5 +1,6 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.dto.OrderRequest;
 import com.example.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,10 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity getOrderById(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
+    }
+
+    @PostMapping()
+    public ResponseEntity createOrder(@RequestBody OrderRequest dto){
+        return ResponseEntity.ok(orderService.createOrder(dto));
     }
 }

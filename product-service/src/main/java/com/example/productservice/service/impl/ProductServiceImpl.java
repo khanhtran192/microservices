@@ -7,12 +7,9 @@ import com.example.productservice.repo.ProductRepo;
 import com.example.productservice.service.ProductService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import org.apache.commons.lang.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.time.LocalDateTime;
 import java.util.List;

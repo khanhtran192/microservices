@@ -22,6 +22,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts());
     }
 
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductResponse> getProductId(@PathVariable Long productId) {
+        return ResponseEntity.ok(productService.findById(productId));
+    }
+
     @PostMapping()
     public ResponseEntity<ProductResponse> insertProduct(@RequestBody ProductRequest productRequest) {
         return ResponseEntity
@@ -34,4 +39,6 @@ public class ProductController {
                                                          @RequestBody ProductRequest productRequest) {
         return ResponseEntity.ok(productService.updateProduct(productId, productRequest));
     }
+
+
 }

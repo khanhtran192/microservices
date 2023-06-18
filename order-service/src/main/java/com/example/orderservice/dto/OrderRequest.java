@@ -12,8 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequest {
-    private String orderId;
     private String customerId;
-    private LocalDateTime updatedAt;
-    private List<Long> productIds;
+    private List<OrderDetailRequest> orderDetails;
 }

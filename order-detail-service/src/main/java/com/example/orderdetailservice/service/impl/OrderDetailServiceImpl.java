@@ -1,22 +1,31 @@
 package com.example.orderdetailservice.service.impl;
 
 import com.example.orderdetailservice.client.OrderClient;
+import com.example.orderdetailservice.client.ProductClient;
+import com.example.orderdetailservice.dto.OrderDetailRequest;
 import com.example.orderdetailservice.dto.OrderDetailResponse;
+import com.example.orderdetailservice.dto.ProductResponse;
 import com.example.orderdetailservice.entity.OrderDetail;
+import com.example.orderdetailservice.exception.BadRequestException;
 import com.example.orderdetailservice.repo.OrderDetailRepo;
 import com.example.orderdetailservice.service.OrderDetailService;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     private OrderDetailRepo orderDetailRepo;
@@ -24,6 +33,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     private ModelMapper modelMapper;
     @Autowired
     private OrderClient orderClient;
+    @Autowired
+    private ProductClient productClient;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @PostConstruct
     public void initData() {
@@ -111,5 +124,46 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .stream()
                 .map(orderDetail -> modelMapper.map(orderDetail, OrderDetailResponse.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDetailResponse> saveOrderDetailsByOrderId(String orderId, List<OrderDetailRequest> orderDetails) {
+        List<OrderDetailResponse> result = new ArrayList<>();
+//        if (!orderClient.isOrderExistsById(orderId)) {
+//            return result;
+//        }
+        if(CollectionUtils.isEmpty(orderDetails)){
+            throw new BadRequestException("Body is null");
+//            throw new RuntimeException("asdasd");
+        }
+        for (OrderDetailRequest dto : orderDetails) {
+            ProductResponse product = productClient.getProductId(dto.getProductId());
+            if (Objects.isNull(product)) {
+                throw new BadRequestException("Not found product with id " + dto.getProductId());
+            }
+            OrderDetail orderDetail = OrderDetail.builder()
+                    .orderId(orderId)
+                    .productId(dto.getProductId())
+                    .productPrice(product.getPrice())
+                    .productName(product.getName())
+                    .productQuantity(dto.getProductQuantity())
+                    .build();
+            orderDetail = orderDetailRepo.save(orderDetail);
+            result.add(modelMapper.map(orderDetail, OrderDetailResponse.class));
+        }
+        return result;
+    }
+
+    @Override
+    public Double getTotalAmountByOrderId(String orderId) {
+        if (!orderClient.isOrderExistsById(orderId)) {
+            return null;
+        }
+        List<OrderDetail> orderDetails = orderDetailRepo.findByOrderId(orderId);
+        Double totalAmount = 0D;
+        for (OrderDetail orderDetail : orderDetails) {
+            totalAmount += orderDetail.getProductPrice() * orderDetail.getProductQuantity();
+        }
+        return totalAmount;
     }
 }
